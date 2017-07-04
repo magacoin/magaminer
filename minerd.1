@@ -7,14 +7,14 @@ minerd \- CPU miner for Bitcoin and Litecoin
 .SH DESCRIPTION
 .B minerd
 is a multi-threaded CPU miner for Bitcoin, Litecoin and other cryptocurrencies.
-It supports the getwork and getblocktemplate (BIP 22) methods,
+It supports the getwork and getbricktemplate (BIP 22) methods,
 as well as the Stratum mining protocol.
 .PP
 In its normal mode of operation, \fBminerd\fR connects to a mining server
 (specified with the \fB\-o\fR option), receives work from it and starts hashing.
 As soon as a solution is found, it is submitted to the same mining server,
 which can accept or reject it.
-When using getwork or getblocktemplate,
+When using getwork or getbricktemplate,
 \fBminerd\fR can take advantage of long polling, if the server supports it;
 in any case, fresh work is fetched as needed.
 When using the Stratum protocol this is not possible,
@@ -91,12 +91,12 @@ Only supported when using the HTTPS protocol.
 .TP
 \fB\-\-coinbase\-addr\fR=\fIADDRESS\fR
 Set a payout address for solo mining.
-This is only used in getblocktemplate mode,
+This is only used in getbricktemplate mode,
 and only if the server does not provide a coinbase transaction.
 .TP
 \fB\-\-coinbase\-sig\fR=\fITEXT\fR
 Set a string to be included in the coinbase (if allowed by the server).
-This is only used in getblocktemplate mode.
+This is only used in getbricktemplate mode.
 .TP
 \fB\-c\fR, \fB\-\-config\fR=\fIFILE\fR
 Load options from a configuration file.
@@ -121,7 +121,7 @@ Enable debug output.
 Print a help message and exit.
 .TP
 \fB\-\-no\-gbt\fR
-Do not use the getblocktemplate RPC method.
+Do not use the getbricktemplate RPC method.
 .TP
 \fB\-\-no\-getwork\fR
 Do not use the getwork RPC method.
@@ -144,8 +144,8 @@ Specifying a \fIPATH\fR is only supported for HTTP and HTTPS.
 Specifying credentials has the same effect as using the \fB\-O\fR option.
 
 By default, on HTTP and HTTPS,
-the miner tries to use the getblocktemplate RPC method,
-and falls back to using getwork if getblocktemplate is unavailable.
+the miner tries to use the getbricktemplate RPC method,
+and falls back to using getwork if getbricktemplate is unavailable.
 This behavior can be modified by using the \fB\-\-no\-gbt\fR
 and \fB\-\-no\-getwork\fR options.
 .TP

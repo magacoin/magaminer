@@ -189,7 +189,7 @@ Options:\n\
       --coinbase-sig=TEXT  data to insert in the coinbase when possible\n\
       --no-longpoll     disable long polling support\n\
       --no-getwork      disable getwork support\n\
-      --no-gbt          disable getblocktemplate support\n\
+      --no-gbt          disable getbricktemplate support\n\
       --no-stratum      disable X-Stratum support\n\
       --no-redirect     ignore requests to change the URL of the mining server\n\
   -q, --quiet           disable per-thread hashmeter output\n\
@@ -400,8 +400,8 @@ static bool gbt_work_decode(const json_t *val, struct work *work)
 	}
 	version = json_integer_value(tmp);
 
-	if (unlikely(!jobj_binary(val, "previousblockhash", prevhash, sizeof(prevhash)))) {
-		applog(LOG_ERR, "JSON invalid previousblockhash");
+	if (unlikely(!jobj_binary(val, "previousbrickhash", prevhash, sizeof(prevhash)))) {
+		applog(LOG_ERR, "JSON invalid previousbrickhash");
 		goto out;
 	}
 
@@ -611,7 +611,7 @@ static bool gbt_work_decode(const json_t *val, struct work *work)
 			sha256d(merkle_tree[i], merkle_tree[2*i], 64);
 	}
 
-	/* assemble block header */
+	/* assemble brick header */
 	work->data[0] = swab32(version);
 	for (i = 0; i < 8; i++)
 		work->data[8 - i] = le32dec(prevhash + i);
@@ -736,13 +736,13 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 			json_decref(val);
 			req = malloc(128 + 2*80 + strlen(work->txs) + strlen(params));
 			sprintf(req,
-				"{\"method\": \"submitblock\", \"params\": [\"%s%s\", %s], \"id\":1}\r\n",
+				"{\"method\": \"submitbrick\", \"params\": [\"%s%s\", %s], \"id\":1}\r\n",
 				data_str, work->txs, params);
 			free(params);
 		} else {
 			req = malloc(128 + 2*80 + strlen(work->txs));
 			sprintf(req,
-				"{\"method\": \"submitblock\", \"params\": [\"%s%s\"], \"id\":1}\r\n",
+				"{\"method\": \"submitbrick\", \"params\": [\"%s%s\"], \"id\":1}\r\n",
 				data_str, work->txs);
 		}
 		val = json_rpc_call(curl, rpc_url, rpc_userpass, req, NULL, 0);
@@ -809,10 +809,10 @@ static const char *getwork_req =
 #define GBT_RULES "[\"segwit\"]"
 
 static const char *gbt_req =
-	"{\"method\": \"getblocktemplate\", \"params\": [{\"capabilities\": "
+	"{\"method\": \"getbricktemplate\", \"params\": [{\"capabilities\": "
 	GBT_CAPABILITIES ", \"rules\": " GBT_RULES "}], \"id\":0}\r\n";
 static const char *gbt_lp_req =
-	"{\"method\": \"getblocktemplate\", \"params\": [{\"capabilities\": "
+	"{\"method\": \"getbricktemplate\", \"params\": [{\"capabilities\": "
 	GBT_CAPABILITIES ", \"rules\": " GBT_RULES ", \"longpollid\": \"%s\"}], \"id\":0}\r\n";
 
 static bool get_upstream_work(CURL *curl, struct work *work)
@@ -843,7 +843,7 @@ start:
 	}
 
 	if (have_gbt && allow_getwork && !val && err == CURLE_OK) {
-		applog(LOG_INFO, "getblocktemplate failed, falling back to getwork");
+		applog(LOG_INFO, "getbricktemplate failed, falling back to getwork");
 		have_gbt = false;
 		goto start;
 	}
@@ -1076,7 +1076,7 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 	/* Increment extranonce2 */
 	for (i = 0; i < sctx->xnonce2_size && !++sctx->job.xnonce2[i]; i++);
 
-	/* Assemble block header */
+	/* Assemble brick header */
 	memset(work->data, 0, 128);
 	work->data[0] = le32dec(sctx->job.version);
 	for (i = 0; i < 8; i++)
